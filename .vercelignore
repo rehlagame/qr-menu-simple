@@ -1,0 +1,12 @@
+.idea
+node_modules
+.env.local
+.env.development
+*.db
+*.sqlite
+temp/*
+uploads/*
+.git
+.gitignore
+README.md
+*.log

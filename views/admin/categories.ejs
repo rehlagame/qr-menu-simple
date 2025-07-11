@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - QR Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h3 class="mb-0">
+            <i class="bi bi-qr-code-scan me-2"></i>
+            QR Menu
+        </h3>
+    </div>
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>لوحة التحكم</span>
+            </a>
+        </li>
+        <li class="active">
+            <a href="/admin/categories">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span>الأقسام</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i>
+                <span>المنتجات</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/qr">
+                <i class="bi bi-qr-code"></i>
+                <span>كود QR</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/settings">
+                <i class="bi bi-gear"></i>
+                <span>الإعدادات</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="sidebar-footer">
+        <a href="/admin/logout" class="btn btn-outline-danger w-100">
+            <i class="bi bi-box-arrow-left me-2"></i>
+            تسجيل الخروج
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="btn btn-link d-md-none" id="sidebarToggle">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <h4 class="mb-0">إدارة الأقسام</h4>
+        <button class="btn btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+            <i class="bi bi-plus-circle me-2"></i>
+            إضافة قسم جديد
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div class="container-fluid p-4">
+        <% if (success) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <!-- Categories Grid -->
+        <div class="row g-4">
+            <% if (categories.length === 0) { %>
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                        <h5>لا توجد أقسام حتى الآن</h5>
+                        <p class="text-muted">ابدأ بإضافة قسم جديد لتنظيم منتجاتك</p>
+                    </div>
+                </div>
+            <% } else { %>
+                <% categories.forEach(category => { %>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="category-card">
+                            <div class="category-header">
+                                <h5 class="mb-0"><%= category.name %></h5>
+                                <span class="badge bg-secondary">الترتيب: <%= category.order_index %></span>
+                            </div>
+                            <div class="category-body">
+                                <p class="text-muted mb-3">
+                                    <i class="bi bi-box-seam me-2"></i>
+                                    عدد المنتجات: <span class="fw-bold"><%= category.product_count || 0 %></span>
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-primary flex-fill"
+                                            onclick="editCategory(<%= category.id %>)">
+                                        <i class="bi bi-pencil"></i>
+                                        تعديل
+                                    </button>
+                                    <form action="/admin/categories/delete/<%= category.id %>" method="POST"
+                                          class="flex-fill" onsubmit="return confirm('هل أنت متأكد من حذف هذا القسم؟\nسيتم حذف جميع المنتجات في هذا القسم!')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger w-100">
+                                            <i class="bi bi-trash"></i>
+                                            حذف
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p class="mb-0">
+            Developed by:
+            <a href="https://www.olosolutions.cc/" target="_blank" class="text-gradient">
+                Olosolutions
+            </a>
+            © 2025
+        </p>
+    </footer>
+</main>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="addCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة قسم جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/categories/add" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="categoryName" class="form-label">اسم القسم</label>
+                        <input type="text" class="form-control" id="categoryName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryOrder" class="form-label">الترتيب</label>
+                        <input type="number" class="form-control" id="categoryOrder" name="order_index"
+                               value="0" min="0">
+                        <div class="form-text">كلما كان الرقم أصغر كلما ظهر القسم أولاً</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        إضافة القسم
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="editCategoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل القسم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editCategoryForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editCategoryName" class="form-label">اسم القسم</label>
+                        <input type="text" class="form-control" id="editCategoryName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCategoryOrder" class="form-label">الترتيب</label>
+                        <input type="number" class="form-control" id="editCategoryOrder" name="order_index"
+                               value="0" min="0">
+                        <div class="form-text">كلما كان الرقم أصغر كلما ظهر القسم أولاً</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-2"></i>
+                        حفظ التغييرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/dashboard.js"></script>
+<script>
+    // وظيفة تعديل القسم
+    function editCategory(id) {
+        // جلب بيانات القسم
+        fetch(`/admin/categories/get/${id}`)
+            .then(response => response.json())
+            .then(category => {
+                // ملء النموذج بالبيانات
+                document.getElementById('editCategoryName').value = category.name;
+                document.getElementById('editCategoryOrder').value = category.order_index;
+
+                // تحديث action للنموذج
+                document.getElementById('editCategoryForm').action = `/admin/categories/update/${id}`;
+
+                // فتح النافذة المنبثقة
+                const modal = new bootstrap.Modal(document.getElementById('editCategoryModal'));
+                modal.show();
+            })
+            .catch(error => {
+                alert('حدث خطأ في جلب بيانات القسم');
+                console.error(error);
+            });
+    }
+</script>
+</body>
+</html>

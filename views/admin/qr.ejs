@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - QR Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+</head>
+<body>
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h3 class="mb-0">
+            <i class="bi bi-qr-code-scan me-2"></i>
+            QR Menu
+        </h3>
+    </div>
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>لوحة التحكم</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/categories">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span>الأقسام</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i>
+                <span>المنتجات</span>
+            </a>
+        </li>
+        <li class="active">
+            <a href="/admin/qr">
+                <i class="bi bi-qr-code"></i>
+                <span>كود QR</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/settings">
+                <i class="bi bi-gear"></i>
+                <span>الإعدادات</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="sidebar-footer">
+        <a href="/admin/logout" class="btn btn-outline-danger w-100">
+            <i class="bi bi-box-arrow-left me-2"></i>
+            تسجيل الخروج
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="btn btn-link d-md-none" id="sidebarToggle">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <h4 class="mb-0">كود QR للقائمة</h4>
+    </div>
+
+    <!-- Content -->
+    <div class="container-fluid p-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="qr-container text-center">
+                    <div class="qr-header">
+                        <h5 class="mb-3">كود QR الخاص بمطعمك</h5>
+                        <p class="text-muted">امسح هذا الكود للوصول إلى قائمة مطعمك</p>
+                    </div>
+
+                    <div class="qr-code-wrapper">
+                        <div id="qrcode" class="mb-4"></div>
+                    </div>
+
+                    <div class="menu-url">
+                        <label class="form-label">رابط القائمة:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="menuUrl"
+                                   value="<%= menuUrl %>" readonly dir="ltr">
+                            <button class="btn btn-outline-secondary" onclick="copyUrl()">
+                                <i class="bi bi-clipboard"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="qr-actions mt-4">
+                        <button class="btn btn-primary" onclick="downloadQR()">
+                            <i class="bi bi-download me-2"></i>
+                            تحميل كود QR
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="printQR()">
+                            <i class="bi bi-printer me-2"></i>
+                            طباعة
+                        </button>
+                    </div>
+
+                    <div class="qr-templates mt-5">
+                        <h6 class="mb-3">قوالب جاهزة للطباعة</h6>
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <div class="template-card" onclick="downloadTemplate('stand')">
+                                    <i class="bi bi-easel"></i>
+                                    <p>ستاند طاولة</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="template-card" onclick="downloadTemplate('sticker')">
+                                    <i class="bi bi-stickies"></i>
+                                    <p>ملصق</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p class="mb-0">
+            Developed by:
+            <a href="https://www.olosolutions.cc/" target="_blank" class="text-gradient">
+                Olosolutions
+            </a>
+            © 2025
+        </p>
+    </footer>
+</main>
+
+<script>
+    // Generate QR Code
+    const qrcode = new QRCode(document.getElementById("qrcode"), {
+        text: "<%= menuUrl %>",
+        width: 256,
+        height: 256,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.H
+    });
+
+    // Copy URL
+    function copyUrl() {
+        const urlInput = document.getElementById('menuUrl');
+        urlInput.select();
+        document.execCommand('copy');
+
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check"></i>';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-secondary');
+
+        setTimeout(() => {
+            btn.innerHTML = originalHtml;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    }
+
+    // Download QR Code
+    function downloadQR() {
+        const canvas = document.querySelector('#qrcode canvas');
+        const url = canvas.toDataURL();
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'qr-menu-<%= restaurantName %>.png';
+        a.click();
+    }
+
+    // Print QR Code
+    function printQR() {
+        window.print();
+    }
+
+    // Download Template (placeholder)
+    function downloadTemplate(type) {
+        alert('سيتم إضافة قوالب التحميل قريباً');
+    }
+</script>
+
+<style>
+    .qr-container {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    }
+
+    .qr-code-wrapper {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 15px;
+        display: inline-block;
+        margin: 2rem 0;
+    }
+
+    #qrcode {
+        display: inline-block;
+    }
+
+    .menu-url {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .template-card {
+        background: #f8f9fa;
+        padding: 2rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+    }
+
+    .template-card:hover {
+        background: #e9ecef;
+        transform: translateY(-3px);
+    }
+
+    .template-card i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .template-card p {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #qrcode, #qrcode * {
+            visibility: visible;
+        }
+
+        #qrcode {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/dashboard.js"></script>
+</body>
+</html>

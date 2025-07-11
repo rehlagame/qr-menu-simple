@@ -1,0 +1,204 @@
+<!-- Language Switcher Component -->
+
+<!-- Debug Info -->
+<script>
+    console.log('Language Switcher Debug:');
+    console.log('lang:', '<%= typeof lang !== "undefined" ? lang : "undefined" %>');
+    console.log('isRTL:', '<%= typeof isRTL !== "undefined" ? isRTL : "undefined" %>');
+</script>
+
+<style>
+    :root {
+        --primary-color: #e74c3c;
+        --accent-color: #f39c12;
+    }
+
+    .language-switcher {
+        position: fixed;
+        top: 1rem;
+    <%= (typeof isRTL !== 'undefined' && isRTL) ? 'left: 1rem;' : 'right: 1rem;' %>
+        z-index: 1000;
+    }
+
+    .language-switcher .dropdown-toggle {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border: 2px solid #e74c3c;
+        border-radius: 50px;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
+        color: #e74c3c;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .language-switcher .dropdown-toggle:hover {
+        background: #e74c3c;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+    }
+
+    .language-switcher .dropdown-menu {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        min-width: 150px;
+        margin-top: 0.5rem;
+    }
+
+    .language-switcher .dropdown-item {
+        padding: 0.7rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .language-switcher .dropdown-item:hover {
+        background: linear-gradient(135deg, #e74c3c, #f39c12);
+        color: white;
+    }
+
+    .language-switcher .dropdown-item.active {
+        background: #e74c3c;
+        color: white;
+    }
+
+    .language-flag {
+        font-size: 1.2rem;
+        margin-<%= (typeof isRTL !== 'undefined' && isRTL) ? 'left' : 'right' %>: 0.3rem;
+    }
+
+    .language-text {
+        display: inline-block;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .language-switcher {
+            top: 0.5rem;
+        <%= (typeof isRTL !== 'undefined' && isRTL) ? 'left: 0.5rem;' : 'right: 0.5rem;' %>
+        }
+
+        .language-switcher .dropdown-toggle {
+            padding: 0.4rem 1rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Animation */
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .language-switcher {
+        animation: fadeInDown 0.5s ease;
+    }
+</style>
+
+<div class="language-switcher">
+    <div class="dropdown">
+        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="language-flag">🇰🇼</span>
+            <span class="language-text">العربية</span>
+        </button>
+        <ul class="dropdown-menu">
+            <li>
+                <a class="dropdown-item" href="?lang=ar">
+                    <span class="language-flag">🇰🇼</span>
+                    العربية
+                </a>
+            </li>
+            <li>
+                <a class="dropdown-item" href="?lang=en">
+                    <span class="language-flag">🇬🇧</span>
+                    English
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // الحصول على اللغة الحالية من URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentLang = urlParams.get('lang') || 'ar';
+
+        // تحديث زر اللغة
+        const button = document.querySelector('.language-switcher .dropdown-toggle');
+        if (button) {
+            if (currentLang === 'en') {
+                button.innerHTML = '<span class="language-flag">🇬🇧</span><span class="language-text">English</span>';
+                // تحديث موضع الزر للإنجليزية
+                document.querySelector('.language-switcher').style.right = '1rem';
+                document.querySelector('.language-switcher').style.left = 'auto';
+            } else {
+                button.innerHTML = '<span class="language-flag">🇰🇼</span><span class="language-text">العربية</span>';
+                // تحديث موضع الزر للعربية
+                document.querySelector('.language-switcher').style.left = '1rem';
+                document.querySelector('.language-switcher').style.right = 'auto';
+            }
+        }
+
+        // تحديث العناصر النشطة في القائمة
+        document.querySelectorAll('.language-switcher .dropdown-item').forEach(item => {
+            item.classList.remove('active');
+            const isEnglishItem = item.textContent.includes('English');
+            const isArabicItem = item.textContent.includes('العربية');
+
+            if ((currentLang === 'en' && isEnglishItem) || (currentLang === 'ar' && isArabicItem)) {
+                item.classList.add('active');
+            }
+        });
+
+        // تحديث روابط اللغة مع الحفاظ على المسار الحالي
+        document.querySelectorAll('.language-switcher .dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+
+                // تحديد اللغة المطلوبة
+                const lang = this.textContent.includes('English') ? 'en' : 'ar';
+
+                // بناء URL جديد مع الحفاظ على المعاملات الأخرى
+                const url = new URL(window.location);
+                url.searchParams.set('lang', lang);
+
+                // حفظ موضع التمرير
+                const scrollPos = window.pageYOffset;
+                url.searchParams.set('scroll', scrollPos);
+
+                // الانتقال للصفحة
+                window.location.href = url.toString();
+            });
+        });
+    });
+
+    // استعادة موضع التمرير بعد تغيير اللغة
+    window.addEventListener('load', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const scrollPos = urlParams.get('scroll');
+
+        if (scrollPos) {
+            // الانتظار قليلاً حتى يتم تحميل الصفحة
+            setTimeout(() => {
+                window.scrollTo(0, parseInt(scrollPos));
+            }, 100);
+
+            // إزالة معامل التمرير من URL
+            urlParams.delete('scroll');
+            const newUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '');
+            window.history.replaceState({}, '', newUrl);
+        }
+    });
+</script>

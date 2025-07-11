@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة المنتجات - QR Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h3 class="mb-0">
+            <i class="bi bi-qr-code-scan me-2"></i>
+            QR Menu
+        </h3>
+    </div>
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span>لوحة التحكم</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/categories">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span>الأقسام</span>
+            </a>
+        </li>
+        <li class="active">
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i>
+                <span>المنتجات</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/qr">
+                <i class="bi bi-qr-code"></i>
+                <span>كود QR</span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/settings">
+                <i class="bi bi-gear"></i>
+                <span>الإعدادات</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="sidebar-footer">
+        <a href="/admin/logout" class="btn btn-outline-danger w-100">
+            <i class="bi bi-box-arrow-left me-2"></i>
+            تسجيل الخروج
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="btn btn-link d-md-none" id="sidebarToggle">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <h4 class="mb-0">إدارة المنتجات</h4>
+        <button type="button" class="btn btn-primary ms-auto" onclick="openAddProductModal()">
+            <i class="bi bi-plus-circle me-2"></i>
+            إضافة منتج جديد
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div class="container-fluid p-4">
+        <% if (success) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <!-- Search and Filter -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="searchProducts"
+                           placeholder="ابحث عن منتج..." onkeyup="searchProducts()">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <select class="form-select" id="sortProducts" onchange="sortProducts()">
+                    <option value="">ترتيب حسب...</option>
+                    <option value="name-asc">الاسم (أ - ي)</option>
+                    <option value="name-desc">الاسم (ي - أ)</option>
+                    <option value="price-asc">السعر (الأقل أولاً)</option>
+                    <option value="price-desc">السعر (الأعلى أولاً)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <ul class="nav nav-pills mb-4" id="categoryFilter">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-category="all">جميع المنتجات</a>
+            </li>
+            <% categories.forEach(category => { %>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-category="<%= category.id %>"><%= category.name %></a>
+                </li>
+            <% }) %>
+        </ul>
+
+        <!-- Products Count -->
+        <div class="mb-3">
+            <span id="productCount" class="text-muted"></span>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row g-4" id="productsGrid">
+            <% if (products.length === 0) { %>
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="bi bi-box-seam"></i>
+                        <h5>لا توجد منتجات حتى الآن</h5>
+                        <p class="text-muted">ابدأ بإضافة منتجاتك لتظهر في القائمة</p>
+                    </div>
+                </div>
+            <% } else { %>
+                <% products.forEach(product => { %>
+                    <div class="col-md-6 col-lg-4 product-item" data-category="<%= product.category_id %>">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <% if (product.image) { %>
+                                    <img src="<%= product.image %>" alt="<%= product.name %>">
+                                <% } else { %>
+                                    <div class="product-image-placeholder">
+                                        <i class="bi bi-image"></i>
+                                    </div>
+                                <% } %>
+                                <span class="product-badge bg-<%= product.is_available ? 'success' : 'danger' %>">
+                                    <%= product.is_available ? 'متوفر' : 'غير متوفر' %>
+                                </span>
+                            </div>
+                            <div class="product-info">
+                                <h5><%= product.name %></h5>
+                                <p class="text-muted small mb-2"><%= product.description || 'بدون وصف' %></p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="product-price"><%= product.price.toFixed(3) %> د.ك</span>
+                                    <span class="badge bg-secondary"><%= product.category_name %></span>
+                                </div>
+                                <div class="product-actions mt-3">
+                                    <button class="btn btn-sm btn-outline-primary" onclick="editProduct(<%= product.id %>)" title="تعديل">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            onclick="deleteProduct(<%= product.id %>, '<%= product.name %>')" title="حذف">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning"
+                                            onclick="toggleProduct(<%= product.id %>, <%= product.is_available %>)"
+                                            title="<%= product.is_available ? 'إخفاء' : 'إظهار' %>">
+                                        <i class="bi bi-eye<%= product.is_available ? '-slash' : '' %>"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } %>
+
+            <!-- No Results Message -->
+            <div class="col-12 no-results" id="noResults">
+                <div class="text-center">
+                    <i class="bi bi-search"></i>
+                    <h5>لا توجد نتائج</h5>
+                    <p class="text-muted">لم يتم العثور على منتجات تطابق البحث</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p class="mb-0">
+            Developed by:
+            <a href="https://www.olosolutions.cc/" target="_blank" class="text-gradient">
+                Olosolutions
+            </a>
+            © 2025
+        </p>
+    </footer>
+</main>
+
+<!-- Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تعديل المنتج</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editProductForm" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductName" class="form-label">اسم المنتج</label>
+                            <input type="text" class="form-control" id="editProductName" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductCategory" class="form-label">القسم</label>
+                            <select class="form-select" id="editProductCategory" name="category_id" required>
+                                <option value="">اختر القسم</option>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category.id %>"><%= category.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="editProductDescription" class="form-label">الوصف</label>
+                            <textarea class="form-control" id="editProductDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductPrice" class="form-label">السعر (د.ك)</label>
+                            <input type="number" class="form-control" id="editProductPrice" name="price"
+                                   step="0.001" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editProductImage" class="form-label">صورة جديدة (اختياري)</label>
+                            <input type="file" class="form-control" id="editProductImage" name="image"
+                                   accept="image/*">
+                            <div class="form-text">اترك فارغاً للاحتفاظ بالصورة الحالية</div>
+                        </div>
+                        <div class="col-12" id="currentImagePreview"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-2"></i>
+                        حفظ التغييرات
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">إضافة منتج جديد</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/products/add" method="POST" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="productName" class="form-label">اسم المنتج</label>
+                            <input type="text" class="form-control" id="productName" name="name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="productCategory" class="form-label">القسم</label>
+                            <select class="form-select" id="productCategory" name="category_id" required>
+                                <option value="">اختر القسم</option>
+                                <% categories.forEach(category => { %>
+                                    <option value="<%= category.id %>"><%= category.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label for="productDescription" class="form-label">الوصف</label>
+                            <textarea class="form-control" id="productDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="productPrice" class="form-label">السعر (د.ك)</label>
+                            <input type="number" class="form-control" id="productPrice" name="price"
+                                   step="0.001" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="productImage" class="form-label">صورة المنتج</label>
+                            <input type="file" class="form-control" id="productImage" name="image"
+                                   accept="image/*">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        إضافة المنتج
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/dashboard.js"></script>
+<script>
+    // فتح نافذة إضافة المنتج
+    function openAddProductModal() {
+        const modal = new bootstrap.Modal(document.getElementById('addProductModal'));
+        modal.show();
+    }
+
+    // وظيفة حذف المنتج
+    function deleteProduct(id, name) {
+        if (confirm(`هل أنت متأكد من حذف المنتج "${name}"؟`)) {
+            // إنشاء نموذج مؤقت للحذف
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/products/delete/${id}`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // وظيفة تبديل حالة المنتج
+    function toggleProduct(id, currentStatus) {
+        const action = currentStatus ? 'إخفاء' : 'إظهار';
+        if (confirm(`هل تريد ${action} هذا المنتج؟`)) {
+            // إنشاء نموذج مؤقت للتبديل
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `/admin/products/toggle/${id}`;
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    // فلترة المنتجات حسب القسم
+    document.querySelectorAll('#categoryFilter .nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // تحديث الفئة النشطة
+            document.querySelectorAll('#categoryFilter .nav-link').forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+
+            // فلترة المنتجات
+            const category = this.dataset.category;
+            document.querySelectorAll('.product-item').forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            // إعادة تعيين البحث
+            document.getElementById('searchProducts').value = '';
+            updateProductCount();
+        });
+    });
+
+    // تحديث عدد المنتجات عند التحميل
+    document.addEventListener('DOMContentLoaded', function() {
+        updateProductCount();
+
+        // التأكد من أن jQuery محمّل
+        if (typeof $ === 'undefined') {
+            console.error('jQuery غير محمل');
+        }
+    });
+
+    // البحث في المنتجات
+    function searchProducts() {
+        const searchTerm = document.getElementById('searchProducts').value.toLowerCase();
+        const products = document.querySelectorAll('.product-item');
+        let hasResults = false;
+
+        products.forEach(product => {
+            const productName = product.querySelector('h5').textContent.toLowerCase();
+            const productDesc = product.querySelector('.text-muted').textContent.toLowerCase();
+            const isInCurrentCategory = product.style.display !== 'none';
+
+            if (isInCurrentCategory && (productName.includes(searchTerm) || productDesc.includes(searchTerm))) {
+                product.style.display = 'block';
+                hasResults = true;
+            } else if (isInCurrentCategory && searchTerm === '') {
+                product.style.display = 'block';
+                hasResults = true;
+            } else {
+                product.style.display = 'none';
+            }
+        });
+
+        // عرض رسالة عدم وجود نتائج
+        document.getElementById('noResults').style.display = hasResults ? 'none' : 'block';
+
+        updateProductCount();
+    }
+
+    // ترتيب المنتجات
+    function sortProducts() {
+        const sortValue = document.getElementById('sortProducts').value;
+        const container = document.getElementById('productsGrid');
+        const products = Array.from(container.querySelectorAll('.product-item'));
+
+        if (!sortValue) return;
+
+        products.sort((a, b) => {
+            const [sortBy, order] = sortValue.split('-');
+
+            if (sortBy === 'name') {
+                const nameA = a.querySelector('h5').textContent;
+                const nameB = b.querySelector('h5').textContent;
+                return order === 'asc'
+                    ? nameA.localeCompare(nameB, 'ar')
+                    : nameB.localeCompare(nameA, 'ar');
+            } else if (sortBy === 'price') {
+                const priceA = parseFloat(a.querySelector('.product-price').textContent);
+                const priceB = parseFloat(b.querySelector('.product-price').textContent);
+                return order === 'asc' ? priceA - priceB : priceB - priceA;
+            }
+        });
+
+        // إعادة ترتيب العناصر
+        products.forEach(product => container.appendChild(product));
+    }
+
+    // تحديث عدد المنتجات المعروضة
+    function updateProductCount() {
+        const visibleProducts = document.querySelectorAll('.product-item:not([style*="display: none"])').length;
+        const totalProducts = document.querySelectorAll('.product-item').length;
+
+        const countElement = document.getElementById('productCount');
+        if (countElement) {
+            if (visibleProducts === totalProducts) {
+                countElement.textContent = `عرض جميع المنتجات (${totalProducts})`;
+            } else {
+                countElement.textContent = `عرض ${visibleProducts} من ${totalProducts} منتج`;
+            }
+        }
+    }
+
+    // وظيفة تعديل المنتج
+    function editProduct(id) {
+        // جلب بيانات المنتج
+        fetch(`/admin/products/get/${id}`)
+            .then(response => response.json())
+            .then(product => {
+                // ملء النموذج بالبيانات
+                document.getElementById('editProductName').value = product.name;
+                document.getElementById('editProductCategory').value = product.category_id;
+                document.getElementById('editProductDescription').value = product.description || '';
+                document.getElementById('editProductPrice').value = product.price;
+
+                // عرض الصورة الحالية
+                const imagePreview = document.getElementById('currentImagePreview');
+                if (product.image) {
+                    imagePreview.innerHTML = `
+                    <div class="mb-3">
+                        <label class="form-label">الصورة الحالية:</label>
+                        <img src="${product.image}" alt="Current" style="max-width: 200px; max-height: 200px; border-radius: 10px;">
+                    </div>
+                `;
+                } else {
+                    imagePreview.innerHTML = '';
+                }
+
+                // تحديث action للنموذج
+                document.getElementById('editProductForm').action = `/admin/products/update/${id}`;
+
+                // فتح النافذة المنبثقة
+                const modal = new bootstrap.Modal(document.getElementById('editProductModal'));
+                modal.show();
+            })
+            .catch(error => {
+                alert('حدث خطأ في جلب بيانات المنتج');
+                console.error(error);
+            });
+    }
+</script>
+
+<style>
+    .product-image-placeholder {
+        width: 100%;
+        height: 200px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ccc;
+        font-size: 3rem;
+    }
+
+    .product-actions .btn {
+        padding: 0.25rem 0.5rem;
+        margin: 0 0.1rem;
+    }
+
+    .product-actions .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    #currentImagePreview img {
+        border: 2px solid #e0e0e0;
+        padding: 5px;
+    }
+
+    /* Search Input */
+    #searchProducts {
+        padding-right: 2.5rem;
+    }
+
+    .input-group-text {
+        background: transparent;
+        border-left: none;
+    }
+
+    /* Product Count */
+    #productCount {
+        font-size: 0.9rem;
+        display: block;
+        margin-top: -0.5rem;
+    }
+
+    /* Smooth Transitions */
+    .product-item {
+        transition: all 0.3s ease;
+    }
+
+    /* No Results Message */
+    .no-results {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+        display: none;
+    }
+
+    .no-results i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= isRTL ? 'rtl' : 'ltr' %>">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - <%= t.appName %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+<!-- Language Switcher -->
+<%- include('../partials/language-switcher') %>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <h3 class="mb-0">
+            <i class="bi bi-qr-code-scan me-2"></i>
+            <%= t.appName %>
+        </h3>
+    </div>
+
+    <ul class="sidebar-menu">
+        <li>
+            <a href="/admin/dashboard">
+                <i class="bi bi-speedometer2"></i>
+                <span><%= t.dashboard %></span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/categories">
+                <i class="bi bi-grid-3x3-gap"></i>
+                <span><%= t.categories %></span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/products">
+                <i class="bi bi-box-seam"></i>
+                <span><%= t.products %></span>
+            </a>
+        </li>
+        <li>
+            <a href="/admin/qr">
+                <i class="bi bi-qr-code"></i>
+                <span>كود QR</span>
+            </a>
+        </li>
+        <li class="active">
+            <a href="/admin/settings">
+                <i class="bi bi-gear"></i>
+                <span><%= t.settings %></span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="sidebar-footer">
+        <a href="/admin/logout" class="btn btn-outline-danger w-100">
+            <i class="bi bi-box-arrow-left me-2"></i>
+            <%= t.logout %>
+        </a>
+    </div>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <button class="btn btn-link d-md-none" id="sidebarToggle">
+            <i class="bi bi-list fs-4"></i>
+        </button>
+        <h4 class="mb-0"><%= t.settings %></h4>
+    </div>
+
+    <!-- Content -->
+    <div class="container-fluid p-4">
+        <% if (success) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle me-2"></i>
+                <%= success %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <% if (error) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <%= error %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <form action="/admin/settings/update" method="POST" enctype="multipart/form-data">
+                    <!-- Basic Information -->
+                    <div class="settings-card">
+                        <div class="settings-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                المعلومات الأساسية
+                            </h5>
+                        </div>
+                        <div class="settings-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="restaurantName" class="form-label"><%= t.restaurantName %></label>
+                                    <input type="text" class="form-control" id="restaurantName"
+                                           name="name" value="<%= restaurant.name %>" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="restaurantNameEn" class="form-label"><%= t.restaurantName %> (English)</label>
+                                    <input type="text" class="form-control" id="restaurantNameEn" dir="ltr"
+                                           name="name_en" value="<%= restaurant.name_en || '' %>"
+                                           placeholder="Restaurant name in English">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="restaurantSlug" class="form-label">معرف المطعم (URL)</label>
+                                    <input type="text" class="form-control" id="restaurantSlug"
+                                           value="<%= restaurant.slug %>" readonly disabled>
+                                    <div class="form-text">لا يمكن تغيير المعرف</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="restaurantPhone" class="form-label"><%= t.phone %></label>
+                                    <input type="tel" class="form-control" id="restaurantPhone"
+                                           name="phone" value="<%= restaurant.phone || '' %>" dir="ltr">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="restaurantEmail" class="form-label"><%= t.email %></label>
+                                    <input type="email" class="form-control" id="restaurantEmail"
+                                           value="<%= restaurant.email %>" readonly disabled>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="restaurantAddress" class="form-label"><%= t.address %></label>
+                                    <textarea class="form-control" id="restaurantAddress" name="address"
+                                              rows="2"><%= restaurant.address || '' %></textarea>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label for="restaurantAddressEn" class="form-label"><%= t.address %> (English)</label>
+                                    <textarea class="form-control" id="restaurantAddressEn" name="address_en" dir="ltr"
+                                              rows="2" placeholder="Address in English"><%= restaurant.address_en || '' %></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logo Upload -->
+                    <div class="settings-card mt-4">
+                        <div class="settings-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-image me-2"></i>
+                                شعار المطعم
+                            </h5>
+                        </div>
+                        <div class="settings-body">
+                            <div class="logo-upload">
+                                <div class="current-logo">
+                                    <% if (restaurant.logo) { %>
+                                        <img src="<%= restaurant.logo %>" alt="Logo" class="logo-preview">
+                                    <% } else { %>
+                                        <div class="logo-placeholder">
+                                            <i class="bi bi-image"></i>
+                                            <p>لا يوجد شعار</p>
+                                        </div>
+                                    <% } %>
+                                </div>
+                                <div class="logo-upload-input">
+                                    <label for="logoFile" class="form-label">تحميل شعار جديد</label>
+                                    <input type="file" class="form-control" id="logoFile"
+                                           name="logo" accept="image/*">
+                                    <div class="form-text">
+                                        الصيغ المدعومة: JPG, PNG, GIF - الحجم الأقصى: 2MB
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Settings -->
+                    <div class="settings-card mt-4">
+                        <div class="settings-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shield-lock me-2"></i>
+                                إعدادات الأمان
+                            </h5>
+                        </div>
+                        <div class="settings-body">
+                            <button type="button" class="btn btn-outline-primary"
+                                    data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                                <i class="bi bi-key me-2"></i>
+                                تغيير كلمة المرور
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>
+                            <%= t.save %> التغييرات
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sidebar Info -->
+            <div class="col-lg-4">
+                <div class="info-card">
+                    <h6 class="mb-3">معلومات الحساب</h6>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-calendar me-2 text-muted"></i>
+                            تاريخ التسجيل:
+                            <%= new Date(restaurant.created_at).toLocaleDateString(lang === 'ar' ? 'ar-KW' : 'en-US') %>
+                        </li>
+                        <li class="mb-3">
+                            <i class="bi bi-link-45deg me-2 text-muted"></i>
+                            رابط القائمة:
+                            <div class="input-group input-group-sm mt-1">
+                                <input type="text" class="form-control"
+                                       value="<%= menuUrl || `/menu/${restaurant.slug}` %>"
+                                       id="menuLink" readonly>
+                                <button class="btn btn-outline-primary" type="button"
+                                        onclick="copyToClipboard('menuLink')" title="نسخ">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <a href="/menu/<%= restaurant.slug %>" target="_blank"
+                                   class="btn btn-outline-success" title="فتح">
+                                    <i class="bi bi-box-arrow-up-right"></i>
+                                </a>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="bi bi-patch-check me-2 text-muted"></i>
+                            الحالة:
+                            <span class="badge bg-success">نشط</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="info-card mt-4">
+                    <h6 class="mb-3">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        نصائح
+                    </h6>
+                    <p class="small text-muted mb-2">
+                        <i class="bi bi-check2 me-1"></i>
+                        استخدم شعار واضح بحجم مربع (500×500) للحصول على أفضل نتيجة
+                    </p>
+                    <p class="small text-muted mb-2">
+                        <i class="bi bi-check2 me-1"></i>
+                        أضف اسم مطعمك بالإنجليزية لعرضه للزوار الأجانب
+                    </p>
+                    <p class="small text-muted mb-0">
+                        <i class="bi bi-check2 me-1"></i>
+                        أضف رقم هاتف صحيح ليتمكن العملاء من التواصل معك
+                    </p>
+                </div>
+
+                <!-- QR Code Preview -->
+                <div class="info-card mt-4">
+                    <h6 class="mb-3">
+                        <i class="bi bi-qr-code me-2"></i>
+                        معاينة كود QR
+                    </h6>
+                    <div class="text-center">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=<%= encodeURIComponent(menuUrl || `/menu/${restaurant.slug}`) %>"
+                             alt="QR Code" class="img-fluid rounded">
+                        <div class="mt-2">
+                            <a href="/admin/qr" class="btn btn-sm btn-primary">
+                                <i class="bi bi-download me-1"></i>
+                                تحميل بأحجام مختلفة
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="dashboard-footer">
+        <p class="mb-0">
+            <%= t.poweredBy %>
+            <a href="https://www.olosolutions.cc/" target="_blank" class="text-gradient">
+                Olosolutions
+            </a>
+            © 2025
+        </p>
+    </footer>
+</main>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تغيير كلمة المرور</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/admin/settings/change-password" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">كلمة المرور الحالية</label>
+                        <input type="password" class="form-control" id="currentPassword"
+                               name="currentPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">كلمة المرور الجديدة</label>
+                        <input type="password" class="form-control" id="newPassword"
+                               name="newPassword" required minlength="6">
+                        <div class="form-text">يجب أن تكون 6 أحرف على الأقل</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">تأكيد كلمة المرور</label>
+                        <input type="password" class="form-control" id="confirmPassword"
+                               name="confirmPassword" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><%= t.cancel %></button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle me-2"></i>
+                        تغيير كلمة المرور
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/dashboard.js"></script>
+<script>
+    // وظيفة نسخ النص
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        element.select();
+        element.setSelectionRange(0, 99999); // للموبايل
+
+        try {
+            document.execCommand('copy');
+            // عرض رسالة نجاح
+            const btn = event.currentTarget;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check"></i>';
+            btn.classList.add('btn-success');
+            btn.classList.remove('btn-outline-primary');
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-outline-primary');
+            }, 2000);
+        } catch (err) {
+            console.error('فشل النسخ:', err);
+        }
+    }
+
+    // معاينة الشعار قبل الرفع
+    document.getElementById('logoFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.querySelector('.current-logo');
+                preview.innerHTML = `<img src="${e.target.result}" alt="Logo Preview" class="logo-preview">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // التحقق من تطابق كلمة المرور
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('newPassword').value;
+        const confirmPassword = this.value;
+
+        if (password !== confirmPassword) {
+            this.setCustomValidity('كلمة المرور غير متطابقة');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+</script>
+
+<style>
+    .logo-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .logo-placeholder {
+        width: 150px;
+        height: 150px;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+    }
+
+    .logo-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .settings-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
+
+    .settings-header {
+        background: #f8f9fa;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .settings-body {
+        padding: 1.5rem;
+    }
+
+    .input-group-sm .btn {
+        padding: 0.25rem 0.75rem;
+    }
+</style>
+</body>
+</html>

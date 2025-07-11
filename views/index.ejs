@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-overlay"></div>
+    <div class="container">
+        <div class="row min-vh-100 align-items-center">
+            <div class="col-lg-6 text-white">
+                <h1 class="display-3 fw-bold mb-4 animate-fade-in">
+                    نظام QR Menu
+                    <span class="text-gradient">الذكي</span>
+                </h1>
+                <p class="lead mb-5 animate-fade-in-delay">
+                    حوّل قائمة مطعمك إلى تجربة رقمية عصرية وسهلة الاستخدام
+                </p>
+                <div class="d-flex gap-3 animate-fade-in-delay-2">
+                    <a href="/admin/login" class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        دخول لوحة التحكم
+                    </a>
+                    <a href="/auth/register" class="btn btn-success btn-lg px-5">
+                        <i class="bi bi-person-plus me-2"></i>
+                        إنشاء حساب جديد
+                    </a>
+                    <a href="/demo" class="btn btn-outline-light btn-lg px-5">
+                        <i class="bi bi-eye me-2"></i>
+                        عرض تجريبي
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="phone-mockup animate-float">
+                    <div class="phone-screen">
+                        <img src="/images/menu-preview.png" alt="Menu Preview" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+        <i class="bi bi-chevron-down"></i>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold">لماذا QR Menu؟</h2>
+            <p class="lead text-muted">مميزات تجعل مطعمك في المقدمة</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-qr-code-scan"></i>
+                    </div>
+                    <h4>سهل الاستخدام</h4>
+                    <p class="text-muted">مسح واحد لكود QR وتظهر القائمة فوراً</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-phone"></i>
+                    </div>
+                    <h4>متجاوب مع الأجهزة</h4>
+                    <p class="text-muted">يعمل بشكل مثالي على جميع الشاشات</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-speedometer2"></i>
+                    </div>
+                    <h4>سريع وفعال</h4>
+                    <p class="text-muted">تحديثات فورية بدون طباعة</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-4">
+    <div class="container text-center">
+        <p class="mb-0">
+            تم التطوير بواسطة
+            <a href="https://www.olosolutions.cc/" class="text-decoration-none text-gradient">Olosolutions</a>
+            © 2025
+        </p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

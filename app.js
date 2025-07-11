@@ -153,8 +153,6 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // مهم جداً - تصدير التطبيق لـ Vercel
-<<<<<<< HEAD
 module.exports = app;
-=======
+
 module.exports = app;
->>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011

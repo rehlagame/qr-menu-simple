@@ -9,8 +9,13 @@ const { helmetConfig, generalLimiter } = require('./middleware/security');
 const { languageMiddleware } = require('./middleware/language');
 
 // إنشاء مجلد temp إذا لم يكن موجوداً (مهم لـ Vercel)
-const tempDir = path.join(__dirname, 'temp');
-if (!fs.existsSync(tempDir)) {
+// إنشاء مجلد temp بشكل آمن لـ Vercel
+const tempDir = process.env.NODE_ENV === 'production' 
+    ? '/tmp' // Vercel يسمح بالكتابة في /tmp فقط
+    : path.join(__dirname, 'temp');
+
+// في التطوير فقط
+if (process.env.NODE_ENV !== 'production' && !fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
 }
 

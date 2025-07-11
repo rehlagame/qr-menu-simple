@@ -50,17 +50,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 // إعدادات الجلسة محسنة لـ Vercel
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'qr-menu-olosolutions-2025',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 24 * 60 * 60 * 1000, // 24 ساعة
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // HTTPS في الإنتاج
-        sameSite: 'lax' // للحماية من CSRF
-    },
-    name: 'qrmenu.sid' // اسم مخصص للكوكي
+app.use(cookieSession({
+    name: 'qrmenu_session',
+    keys: [process.env.SESSION_SECRET || 'qr-menu-olosolutions-2025'],
+    maxAge: 24 * 60 * 60 * 1000, // 24 ساعة
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
 }));
 
 // Middleware للغة - مهم أن يكون بعد الجلسة والكوكيز

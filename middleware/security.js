@@ -62,9 +62,13 @@ const uploadLimiter = rateLimit({
     message: 'تم تجاوز الحد المسموح من رفع الملفات'
 });
 
+// تصدير loginLimiter باسم مختلف
+const loginLimiter = authLimiter;
+
 module.exports = {
     helmetConfig,
     generalLimiter,
     authLimiter,
-    uploadLimiter
+    uploadLimiter,
+    loginLimiter
 };

@@ -57,8 +57,6 @@ module.exports = {
     validateLogin,
     validateRegister,
     csrfProtection
-<<<<<<< HEAD
 };
-=======
-};
->>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
+
+

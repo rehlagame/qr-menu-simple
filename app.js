@@ -4,22 +4,22 @@ const expressLayouts = require('express-ejs-layouts');
 const cookieSession = require('cookie-session');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const { helmetConfig, generalLimiter } = require('../middleware/security');
-const { languageMiddleware } = require('../middleware/language');
+const { helmetConfig, generalLimiter } = require('./middleware/security');
+const { languageMiddleware } = require('./middleware/language');
 
 // اختيار قاعدة البيانات حسب البيئة
 const dbType = process.env.DB_TYPE || 'sqlite';
 const db = dbType === 'supabase'
-    ? require('../database/supabase')
-    : require('../database/db');
+    ? require('./database/supabase')
+    : require('./database/db');
 
 console.log(`📊 Using ${dbType} database`);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Trust proxy for Vercel (enhanced for multiple proxies)
-app.set('trust proxy', true);
+// Trust proxy for Vercel
+app.set('trust proxy', 1);
 
 // إعدادات الأمان
 app.use(helmetConfig);
@@ -29,11 +29,11 @@ app.use(generalLimiter);
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
-app.set('views', path.join(__dirname, '../views'));
+app.set('views', path.join(__dirname, 'views'));
 
 // Middleware - الترتيب مهم!
-app.use(express.static(path.join(__dirname, '../public')));
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
@@ -45,7 +45,7 @@ app.use(cookieSession({
     maxAge: 24 * 60 * 60 * 1000, // 24 ساعة
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'  // 'none' for cross-site on Vercel
+    sameSite: 'lax'
 }));
 
 // Middleware للغة - مهم أن يكون بعد الجلسة والكوكيز
@@ -54,13 +54,13 @@ app.use(languageMiddleware);
 // Middleware للتحقق من تسجيل الدخول
 const requireAuth = (req, res, next) => {
     if (!req.session.restaurantId) {
-        return res.redirect('/auth/login');
+        return res.redirect('/admin/login');
     }
     next();
 };
 
 // استيراد Routes
-const routes = require('../routes');
+const routes = require('./routes');
 
 // الصفحة الرئيسية
 app.get('/', (req, res) => {
@@ -96,11 +96,11 @@ app.get('/demo', (req, res) => {
 app.use('/auth', routes.auth(db));
 
 // 2. Admin sub-routes (يجب أن تكون قبل /admin العام)
-app.use('/admin/categories', requireAuth, routes.categories(db));
-app.use('/admin/products', requireAuth, routes.products(db));
+app.use('/admin/categories', routes.categories(db, requireAuth));
+app.use('/admin/products', routes.products(db, requireAuth));
 
 // 3. Admin general routes (يجب أن يكون آخر admin route)
-app.use('/admin', requireAuth, routes.admin(db));
+app.use('/admin', routes.admin(db, requireAuth));
 
 // 4. Menu routes (للزوار)
 app.use('/menu', routes.menu(db));
@@ -121,14 +121,14 @@ app.use((error, req, res, next) => {
         req.session.error = error.message || res.locals.t?.error || 'حدث خطأ في النظام';
         return res.redirect('back');
     }
-    
+
     next();
 });
 
 // صفحة 404
 app.use((req, res) => {
     console.log('404 - Page not found:', req.originalUrl);
-    
+
     res.status(404).render('404', {
         title: res.locals.t?.pageNotFound || 'الصفحة غير موجودة',
         lang: res.locals.lang || 'ar',
@@ -141,10 +141,10 @@ app.use((req, res) => {
 // معالجة أخطاء الخادم 500
 app.use((err, req, res, next) => {
     console.error('Server Error:', err.stack);
-    
+
     // في حالة الإنتاج، لا نظهر تفاصيل الخطأ
     const isDevelopment = process.env.NODE_ENV !== 'production';
-    
+
     res.status(500).render('error', {
         title: 'خطأ في الخادم',
         message: isDevelopment ? err.message : 'عذراً، حدث خطأ في الخادم',
@@ -171,7 +171,7 @@ if (process.env.NODE_ENV !== 'production') {
         console.log(`🌐 Language support: AR/EN`);
         console.log(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log('================================================');
-        
+
         // اختبار الاتصال بقاعدة البيانات
         if (db && db.get) {
             db.get('SELECT 1', (err) => {

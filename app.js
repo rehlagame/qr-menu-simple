@@ -1,24 +1,11 @@
 require('dotenv').config();
 
 const express = require('express');
-const session = require('express-session');
+const cookieSession = require('cookie-session');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const fs = require('fs');
 const { helmetConfig, generalLimiter } = require('./middleware/security');
 const { languageMiddleware } = require('./middleware/language');
-
-// إنشاء مجلد temp إذا لم يكن موجوداً (مهم لـ Vercel)
-const tempDir = path.join(__dirname, 'temp');
-if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-}
-
-// إنشاء مجلد uploads إذا لم يكن موجوداً
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-}
 
 // اختيار قاعدة البيانات حسب البيئة
 const dbType = process.env.DB_TYPE || 'sqlite';
@@ -40,6 +27,8 @@ app.use(generalLimiter);
 
 // إعدادات التطبيق
 app.set('view engine', 'ejs');
+app.use(expressLayouts);
+app.set('layout', 'layouts/main');
 app.set('views', path.join(__dirname, 'views'));
 
 // Middleware
@@ -50,17 +39,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 // إعدادات الجلسة محسنة لـ Vercel
-app.use(session({
-    secret: process.env.SESSION_SECRET || 'qr-menu-olosolutions-2025',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-        maxAge: 24 * 60 * 60 * 1000, // 24 ساعة
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production', // HTTPS في الإنتاج
-        sameSite: 'lax' // للحماية من CSRF
-    },
-    name: 'qrmenu.sid' // اسم مخصص للكوكي
+app.use(cookieSession({
+    name: 'qrmenu_session',
+    keys: [process.env.SESSION_SECRET || 'qr-menu-olosolutions-2025'],
+    maxAge: 24 * 60 * 60 * 1000, // 24 ساعة
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax'
 }));
 
 // Middleware للغة - مهم أن يكون بعد الجلسة والكوكيز
@@ -151,7 +136,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// تشغيل الخادم
 // تشغيل الخادم للتطوير فقط
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {

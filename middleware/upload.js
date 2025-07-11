@@ -2,16 +2,8 @@ const multer = require('multer');
 const path = require('path');
 const { uploadImage } = require('../utils/storage');
 
-// إعدادات multer للحفظ المؤقت
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'temp/') // مجلد مؤقت
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + path.extname(file.originalname));
-    }
-});
+// استخدام الذاكرة بدلاً من الملفات المؤقتة - حل نهائي لـ Vercel
+const storage = multer.memoryStorage();
 
 const upload = multer({
     storage: storage,
@@ -35,14 +27,23 @@ const handleUpload = (folder = 'products') => {
         if (!req.file) return next();
 
         try {
+            // تعديل الملف ليعمل مع storage.js
+            // نمرر الملف كما هو مع buffer
+            const fileToUpload = {
+                buffer: req.file.buffer,
+                originalname: req.file.originalname,
+                mimetype: req.file.mimetype
+            };
+
             // رفع إلى السحابة
-            const imageUrl = await uploadImage(req.file, folder);
+            const imageUrl = await uploadImage(fileToUpload, folder);
 
             // حفظ الرابط في req
             req.uploadedImageUrl = imageUrl;
 
             next();
         } catch (error) {
+            console.error('Upload error:', error);
             return res.status(500).json({ error: 'فشل رفع الصورة' });
         }
     };

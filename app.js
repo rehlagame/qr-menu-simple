@@ -152,6 +152,7 @@ app.use((err, req, res, next) => {
 });
 
 // تشغيل الخادم
+// تشغيل الخادم للتطوير فقط
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
         console.log(`🚀 Server running on http://localhost:${PORT}`);
@@ -161,7 +162,10 @@ if (process.env.NODE_ENV !== 'production') {
         console.log(`🌐 Language support: AR/EN`);
         console.log(`🔒 Environment: ${process.env.NODE_ENV || 'development'}`);
     });
+} else {
+    // للإنتاج - لا نستخدم listen
+    console.log('🚀 Running in production mode on Vercel');
 }
 
-// Export for Vercel
+// مهم جداً - تصدير التطبيق لـ Vercel
 module.exports = app;

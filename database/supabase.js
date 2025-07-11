@@ -236,13 +236,10 @@ function extractWhereConditions(query, params) {
 
         parts.forEach((part, index) => {
             let column = part.split(/\s*=\s*/)[0].trim();
-< 
             // إزالة الـ alias إذا وُجد (مثل c.restaurant_id -> restaurant_id)
             if (column.includes('.')) {
                 column = column.split('.').pop();
-            }
-
-            conditions.push({
+            }            conditions.push({
                 column: column,
                 value: params[index]
             });
@@ -257,11 +254,11 @@ function extractOrderBy(query) {
     if (match) {
         let column = match[1];
 
-
         // إزالة الـ alias من ORDER BY أيضاً
         if (column.includes('.')) {
             column = column.split('.').pop();
         }
+
 
         return {
             column: column,

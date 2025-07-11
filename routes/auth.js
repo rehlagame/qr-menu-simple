@@ -5,9 +5,9 @@ const {
     validateLogin,
     validateRegister,
     handleValidationErrors,
-    loginLimiter,
     csrfProtection
-} = require('../middleware/security');
+} = require('../middleware/validators');
+const { loginLimiter } = require('../middleware/security');
 
 module.exports = (db) => {
     // صفحة تسجيل الدخول

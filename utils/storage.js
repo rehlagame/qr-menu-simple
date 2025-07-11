@@ -1,5 +1,4 @@
 const { createClient } = require('@supabase/supabase-js');
-const fs = require('fs').promises;
 const path = require('path');
 
 // إنشاء عميل Supabase
@@ -11,12 +10,12 @@ const supabase = createClient(
 // دالة رفع الصورة
 async function uploadImage(file, folder = 'products') {
     try {
-        // قراءة الملف
-        const fileBuffer = await fs.readFile(file.path);
-
         // إنشاء اسم فريد
         const fileExt = path.extname(file.originalname);
         const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}${fileExt}`;
+
+        // استخدام buffer مباشرة
+        const fileBuffer = file.buffer || file.path;
 
         // رفع إلى Supabase Storage
         const { data, error } = await supabase.storage
@@ -27,9 +26,6 @@ async function uploadImage(file, folder = 'products') {
             });
 
         if (error) throw error;
-
-        // حذف الملف المحلي
-        await fs.unlink(file.path);
 
         // إرجاع الرابط العام
         const { data: publicUrl } = supabase.storage

@@ -8,21 +8,12 @@ const fs = require('fs');
 const { helmetConfig, generalLimiter } = require('./middleware/security');
 const { languageMiddleware } = require('./middleware/language');
 
-// إنشاء مجلد temp إذا لم يكن موجوداً (مهم لـ Vercel)
-// إنشاء مجلد temp بشكل آمن لـ Vercel
-const tempDir = process.env.NODE_ENV === 'production' 
-    ? '/tmp' // Vercel يسمح بالكتابة في /tmp فقط
-    : path.join(__dirname, 'temp');
-
-// في التطوير فقط
-if (process.env.NODE_ENV !== 'production' && !fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-}
-
-// إنشاء مجلد uploads إذا لم يكن موجوداً
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir, { recursive: true });
+// إنشاء مجلد uploads إذا لم يكن موجوداً (للتطوير فقط)
+if (process.env.NODE_ENV !== 'production') {
+    const uploadsDir = path.join(__dirname, 'uploads');
+    if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+    }
 }
 
 // اختيار قاعدة البيانات حسب البيئة
@@ -152,7 +143,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// تشغيل الخادم
 // تشغيل الخادم للتطوير فقط
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {

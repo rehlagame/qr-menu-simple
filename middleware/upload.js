@@ -5,7 +5,8 @@ const { uploadImage } = require('../utils/storage');
 // إعدادات multer للحفظ المؤقت
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'temp/') // مجلد مؤقت
+    const tempDir = process.env.NODE_ENV === 'production' ? '/tmp' : 'temp/';
+    cb(null, tempDir);
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);

@@ -84,11 +84,10 @@ app.get('/api/health', (req, res) => {
 });
 
 // استخدام Routes
-app.use('/admin', routes.auth(db));
-app.use('/auth', routes.auth(db)); // للتسجيل
-app.use('/admin', routes.admin(db, requireAuth));
-app.use('/admin/categories', routes.categories(db, requireAuth));
-app.use('/admin/products', routes.products(db, requireAuth));
+app.use('/auth', routes.auth(db)); // للتسجيل وتسجيل الدخول
+app.use('/admin/categories', routes.categories(db, requireAuth)); // قبل /admin العام
+app.use('/admin/products', routes.products(db, requireAuth)); // قبل /admin العام
+app.use('/admin', routes.admin(db, requireAuth)); // آخر شيء
 app.use('/menu', routes.menu(db));
 
 // صفحة العرض التجريبي

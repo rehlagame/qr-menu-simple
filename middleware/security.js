@@ -10,8 +10,7 @@ const helmetConfig = helmet({
             styleSrc: [
                 "'self'",
                 "'unsafe-inline'",
-
-                "'self'", 
+                "'self'",
                 "'unsafe-inline'", 
                 "https://fonts.googleapis.com",
                 "https://cdnjs.cloudflare.com",
@@ -19,15 +18,14 @@ const helmetConfig = helmet({
             ],
             fontSrc: [
                 "'self'",
-
-                "'self'", 
+                "'self'",
                 "https://fonts.gstatic.com",
                 "https://cdn.jsdelivr.net",
                 "data:"
             ],
             scriptSrc: [
                 "'self'",
-                "'self'", 
+                "'self'",
                 "'unsafe-inline'",
                 "https://cdnjs.cloudflare.com",
                 "https://cdn.jsdelivr.net"
@@ -35,7 +33,7 @@ const helmetConfig = helmet({
             imgSrc: [
                 "'self'",
                 "data:",
-                "'self'", 
+                "'self'",
                 "data:", 
                 "blob:",
                 "https:",

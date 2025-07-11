@@ -4,17 +4,8 @@ const express = require('express');
 const cookieSession = require('cookie-session');
 const path = require('path');
 const cookieParser = require('cookie-parser');
-const fs = require('fs');
 const { helmetConfig, generalLimiter } = require('./middleware/security');
 const { languageMiddleware } = require('./middleware/language');
-
-// إنشاء مجلد uploads إذا لم يكن موجوداً (للتطوير فقط)
-if (process.env.NODE_ENV !== 'production') {
-    const uploadsDir = path.join(__dirname, 'uploads');
-    if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-}
 
 // اختيار قاعدة البيانات حسب البيئة
 const dbType = process.env.DB_TYPE || 'sqlite';

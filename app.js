@@ -54,7 +54,7 @@ app.use(languageMiddleware);
 // Middleware للتحقق من تسجيل الدخول
 const requireAuth = (req, res, next) => {
     if (!req.session.restaurantId) {
-        return res.redirect('/admin/login');
+        return res.redirect('/auth/login');
     }
     next();
 };

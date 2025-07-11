@@ -236,12 +236,20 @@ function extractWhereConditions(query, params) {
 
         parts.forEach((part, index) => {
             let column = part.split(/\s*=\s*/)[0].trim();
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
             // إزالة الـ alias إذا وُجد (مثل c.restaurant_id -> restaurant_id)
             if (column.includes('.')) {
                 column = column.split('.').pop();
             }
+<<<<<<< HEAD
 
+=======
+            
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
             conditions.push({
                 column: column,
                 value: params[index]
@@ -256,12 +264,20 @@ function extractOrderBy(query) {
     const match = query.match(/ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?/i);
     if (match) {
         let column = match[1];
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
         // إزالة الـ alias من ORDER BY أيضاً
         if (column.includes('.')) {
             column = column.split('.').pop();
         }
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
         return {
             column: column,
             ascending: !match[2] || match[2].toUpperCase() === 'ASC'

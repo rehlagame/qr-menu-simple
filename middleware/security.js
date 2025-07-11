@@ -8,27 +8,45 @@ const helmetConfig = helmet({
         directives: {
             defaultSrc: ["'self'"],
             styleSrc: [
+<<<<<<< HEAD
                 "'self'",
                 "'unsafe-inline'",
+=======
+                "'self'", 
+                "'unsafe-inline'", 
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
                 "https://fonts.googleapis.com",
                 "https://cdnjs.cloudflare.com",
                 "https://cdn.jsdelivr.net"
             ],
             fontSrc: [
+<<<<<<< HEAD
                 "'self'",
+=======
+                "'self'", 
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
                 "https://fonts.gstatic.com",
                 "https://cdn.jsdelivr.net",
                 "data:"
             ],
             scriptSrc: [
+<<<<<<< HEAD
                 "'self'",
+=======
+                "'self'", 
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
                 "'unsafe-inline'",
                 "https://cdnjs.cloudflare.com",
                 "https://cdn.jsdelivr.net"
             ],
             imgSrc: [
+<<<<<<< HEAD
                 "'self'",
                 "data:",
+=======
+                "'self'", 
+                "data:", 
+>>>>>>> e3bc304c6d0896aec8406577e763e5b93eb64011
                 "blob:",
                 "https:",
                 process.env.SUPABASE_URL ? process.env.SUPABASE_URL.replace('/auth/v1', '') : '*'

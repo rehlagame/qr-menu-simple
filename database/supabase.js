@@ -235,9 +235,15 @@ function extractWhereConditions(query, params) {
         const parts = whereClause.split(/\s+AND\s+/i);
 
         parts.forEach((part, index) => {
-            const [column] = part.split(/\s*=\s*/);
+            let column = part.split(/\s*=\s*/)[0].trim();
+            
+            // إزالة الـ alias إذا وُجد (مثل c.restaurant_id -> restaurant_id)
+            if (column.includes('.')) {
+                column = column.split('.').pop();
+            }
+            
             conditions.push({
-                column: column.trim(),
+                column: column,
                 value: params[index]
             });
         });
@@ -249,8 +255,15 @@ function extractWhereConditions(query, params) {
 function extractOrderBy(query) {
     const match = query.match(/ORDER\s+BY\s+(\w+)(?:\s+(ASC|DESC))?/i);
     if (match) {
+        let column = match[1];
+        
+        // إزالة الـ alias من ORDER BY أيضاً
+        if (column.includes('.')) {
+            column = column.split('.').pop();
+        }
+        
         return {
-            column: match[1],
+            column: column,
             ascending: !match[2] || match[2].toUpperCase() === 'ASC'
         };
     }
@@ -292,10 +305,10 @@ async function seedDemoData() {
             .single();
 
         if (!existing) {
-            const demoPassword = bcrypt.hashSync('demo123', 10);
+            const demoPassword = await bcrypt.hash('demo123', 10);
 
             // إضافة مطعم تجريبي
-            const { data: restaurant } = await supabase
+            const { data: restaurant, error: restaurantError } = await supabase
                 .from('restaurants')
                 .insert({
                     name: 'مطعم الوجبات السريعة',
@@ -303,10 +316,17 @@ async function seedDemoData() {
                     email: 'demo@qrmenu.com',
                     password: demoPassword,
                     phone: '+965 12345678',
-                    address: 'الكويت - حولي'
+                    address: 'الكويت - حولي',
+                    description: 'مطعم تجريبي لعرض النظام',
+                    created_at: new Date().toISOString()
                 })
                 .select()
                 .single();
+
+            if (restaurantError) {
+                console.error('❌ خطأ في إضافة المطعم التجريبي:', restaurantError);
+                return;
+            }
 
             if (restaurant) {
                 // إضافة أقسام تجريبية
@@ -319,16 +339,59 @@ async function seedDemoData() {
                 ];
 
                 for (const cat of categories) {
-                    await supabase
+                    const { data: category, error: catError } = await supabase
                         .from('categories')
                         .insert({
                             restaurant_id: restaurant.id,
-                            ...cat
-                        });
+                            ...cat,
+                            created_at: new Date().toISOString()
+                        })
+                        .select()
+                        .single();
+
+                    if (catError) {
+                        console.error('❌ خطأ في إضافة القسم:', catError);
+                        continue;
+                    }
+
+                    // إضافة منتجات تجريبية لكل قسم
+                    if (category && cat.name === 'البرجر') {
+                        const products = [
+                            {
+                                name: 'برجر كلاسيك',
+                                name_en: 'Classic Burger',
+                                description: 'برجر لحم بقري مع الخضار الطازجة',
+                                description_en: 'Beef burger with fresh vegetables',
+                                price: 2.5,
+                                is_available: true
+                            },
+                            {
+                                name: 'برجر الجبن',
+                                name_en: 'Cheese Burger',
+                                description: 'برجر لحم بقري مع جبن الشيدر',
+                                description_en: 'Beef burger with cheddar cheese',
+                                price: 3.0,
+                                is_available: true
+                            }
+                        ];
+
+                        for (const product of products) {
+                            await supabase
+                                .from('products')
+                                .insert({
+                                    restaurant_id: restaurant.id,
+                                    category_id: category.id,
+                                    ...product,
+                                    created_at: new Date().toISOString()
+                                });
+                        }
+                    }
                 }
 
-                console.log('✅ تم إضافة البيانات التجريبية');
+                console.log('✅ تم إضافة البيانات التجريبية بنجاح');
             }
+        } else {
+            console.log('ℹ️ المطعم التجريبي موجود بالفعل');
         }
     } catch (error) {
         console.error('❌ خطأ في إضافة البيانات التجريبية:', error);
@@ -336,6 +399,6 @@ async function seedDemoData() {
 }
 
 // تشغيل البيانات التجريبية عند بدء التطبيق
-//setTimeout(seedDemoData, 2000);
+setTimeout(seedDemoData, 2000);
 
 module.exports = db;
